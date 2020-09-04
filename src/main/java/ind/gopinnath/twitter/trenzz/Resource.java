@@ -1,0 +1,51 @@
+package ind.gopinnath.twitter.trenzz;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import org.bson.Document;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+
+@ApplicationScoped
+@Path("/api")
+public class Resource {
+	
+	@Inject 
+	private MongoClient mongoClient;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/trenzz")
+    public Summaries summarize() {
+		Summaries summaries = new Summaries();
+        List<HourlySummary> hourlyList = new ArrayList<>();
+        MongoCursor<Document> cursor = getCollection().find().iterator();
+        Jsonb jsonb = JsonbBuilder.create();
+        try {
+            while (cursor.hasNext()) {
+                hourlyList.add(jsonb.fromJson(cursor.next().getString("description"),HourlySummary.class));
+            }
+        } finally {
+            cursor.close();
+        }
+        summaries.setHourlySummaries(hourlyList);
+		return summaries;
+	}
+	
+
+    private MongoCollection<Document> getCollection(){
+        return mongoClient.getDatabase("twittertrend").getCollection("trends");
+    }
+}
