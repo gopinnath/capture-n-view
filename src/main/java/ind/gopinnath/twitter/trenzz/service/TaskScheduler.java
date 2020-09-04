@@ -44,8 +44,7 @@ public class TaskScheduler {
     private TwitterService service;
 
     
-    //@Scheduled(cron = "0 1 * ? * *")
-    @Scheduled(every = "15m",delay=1)
+    @Scheduled(cron = "0 1 * ? * *")
     public void queryAndCaptureTrend() {
     	AuthToken token = service.authenticate("client_credentials",generateBasicAuthValue());
     	Trends trends = service.fetchTrends(woeid,getBearerHeaderValue(token))[0];
