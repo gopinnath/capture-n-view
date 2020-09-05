@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>capture-n-view - 1.0.0-SNAPSHOT</title>
+    <title>Twitter Trends in India During Last Week</title>
     <style>
         h1, h2, h3, h4, h5, h6 {
             margin-bottom: 0.5rem;
@@ -96,60 +96,108 @@
         }
 
     </style>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+	<script src="https://d3js.org/d3-fetch.v1.min.js"></script>
 </head>
 <body>
+<h5>The Sample Application that captures the Twitter Trend Information on Hourly basis.</h5>
+<div id="trendvisualization"></div>
 
-<div class="banner lead">
-    Your new Cloud-Native application is ready!
-</div>
-
-<div class="container">
-    <div class="left-column">
-        <p class="lead"> Congratulations, you have created a new Quarkus application.</p>
-
-        <h2>Why do you see this?</h2>
-
-        <p>This page is served by Quarkus. The source is in
-            <code>src/main/resources/META-INF/resources/index.html</code>.</p>
-
-        <h2>What can I do from here?</h2>
-
-        <p>If not already done, run the application in <em>dev mode</em> using: <code>mvn compile quarkus:dev</code>.
-        </p>
-        <ul>
-            <li>Add REST resources, Servlets, functions and other services in <code>src/main/java</code>.</li>
-            <li>Your static assets are located in <code>src/main/resources/META-INF/resources</code>.</li>
-            <li>Configure your application in <code>src/main/resources/application.properties</code>.
-            </li>
-        </ul>
-
-        <h2>Do you like Quarkus?</h2>
-        <p>Go give it a star on <a href="https://github.com/quarkusio/quarkus">GitHub</a>.</p>
-
-        <h2>How do I get rid of this page?</h2>
-        <p>Just delete the <code>src/main/resources/META-INF/resources/index.html</code> file.</p>
-    </div>
-    <div class="right-column">
-        <div class="right-section">
-            <h3>Application</h3>
-            <ul>
-                <li>GroupId: ind.gopinnath.twitter.trenzz</li>
-                <li>ArtifactId: capture-n-view</li>
-                <li>Version: 1.0.0-SNAPSHOT</li>
-                <li>Quarkus Version: 1.7.1.Final</li>
-            </ul>
-        </div>
-        <div class="right-section">
-            <h3>Next steps</h3>
-            <ul>
-                <li><a href="https://quarkus.io/guides/maven-tooling.html" target="_blank">Setup your IDE</a></li>
-                <li><a href="https://quarkus.io/guides/getting-started.html" target="_blank">Getting started</a></li>
-                <li><a href="https://quarkus.io" target="_blank">Quarkus Web Site</a></li>
-            </ul>
-        </div>
-    </div>
-</div>
+<script>
 
 
+// set the dimensions and margins of the graph
+var margin = {top: 50, right: 30, bottom: 100, left: 100},
+    width = 460 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#trendvisualization");
+
+// Create Event Handler Function
+var processResponse = function(data)	{
+	data['hourlySummaries'].forEach(function(hour,index)	{
+		setTimeout(processHourlyData,2000 * index,hour);
+	});
+}
+
+var processTrend = function(trend)	{
+    return { "keyword" :trend.trendSequence + ". " + trend.name,
+        "volume": processVolume(trend)};
+}
+
+var processVolume = function(trend)	{
+	if(trend.tweetVolume === undefined) return 0;
+	return trend.tweetVolume;
+}
+
+var processHourlyData = function(hour)	{
+
+	var trendHour = new Date(hour.hour);
+	
+	d3.selectAll("svg > *").remove();
+	var trendChart = document.getElementById("trendChart");
+	if(trendChart != null)	{
+		trendChart.remove();
+	}
+		
+	svg = d3.select("#trendvisualization")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	    .attr("id","trendChart")
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + margin.left + "," + margin.top + ")");
+	
+	var data = hour['trends'].map(processTrend);
+	var maxVolume = Math.max(...data.map(trend=>trend.volume)); 
+	// X axis
+	var x = d3.scaleBand()
+	  .range([ 0, width ])
+	  .domain(data.map(function(d) { return d.keyword; }))
+	  .padding(0.2);
+	svg.append("g")
+	  .attr("transform", "translate(0," + height + ")")
+	  .call(d3.axisBottom(x))
+	  .selectAll("text")
+	    .attr("transform", "translate(-10,0)rotate(-45)")
+	    .style("text-anchor", "end");
+	
+	var y = d3.scaleLinear()
+	  .domain([0, maxVolume])
+	  .range([ height, 0]);
+	svg.append("g")
+	  .call(d3.axisLeft(y));
+	
+	svg.append("g")
+	    .append("text")
+	    .attr("x", -50)
+	    .attr("y", -30)
+	    .attr("dy", ".71em")
+	    .text(trendHour);
+	
+	svg.selectAll("mybar")
+	  .data(data)
+	  .enter()
+	  .append("rect")
+	    .attr("x", function(d) { return x(d.keyword); })
+	    .attr("width", x.bandwidth())
+	    .attr("fill", "#69b3a2")
+	    // no bar at the beginning thus:
+	    .attr("height", function(d) { return height - y(0); }) // always equal to 0
+	    .attr("y", function(d) { return y(0); });
+	    
+	    svg.selectAll("rect")
+		  .transition()
+		  .duration(800)
+		  .attr("y", function(d) { return y(d.volume); })
+		  .attr("height", function(d) { return height - y(d.volume); })
+		  .delay(function(d,i){return(i*100);});
+}
+
+d3.json("/api/trenzz").then(processResponse);
+</script>
 </body>
 </html>

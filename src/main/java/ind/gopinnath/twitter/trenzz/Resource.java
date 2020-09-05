@@ -17,6 +17,10 @@ import org.bson.Document;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
+
+import ind.gopinnath.twitter.trenzz.util.DateUtil;
 
 @ApplicationScoped
 @Path("/api")
@@ -31,7 +35,11 @@ public class Resource {
     public Summaries summarize() {
 		Summaries summaries = new Summaries();
         List<HourlySummary> hourlyList = new ArrayList<>();
-        MongoCursor<Document> cursor = getCollection().find().iterator();
+        Long beginingOfWeek = DateUtil.getEpochValue(DateUtil.getBeginingOfWeekHour());
+        MongoCursor<Document> cursor = getCollection()
+        		.find(Filters.gte("name",beginingOfWeek))
+        		.sort(Sorts.ascending("name"))
+        		.iterator();
         Jsonb jsonb = JsonbBuilder.create();
         try {
             while (cursor.hasNext()) {

@@ -1,8 +1,6 @@
 package ind.gopinnath.twitter.trenzz.service;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.logging.Logger;
 
@@ -20,6 +18,7 @@ import com.mongodb.client.MongoCollection;
 
 import ind.gopinnath.twitter.trenzz.HourlySummary;
 import ind.gopinnath.twitter.trenzz.TrendResponse;
+import ind.gopinnath.twitter.trenzz.util.DateUtil;
 import io.quarkus.scheduler.Scheduled;
 
 @ApplicationScoped
@@ -58,22 +57,18 @@ public class TaskScheduler {
 
     
     private void persistTrends(Trends trends) {
-		LocalDateTime tweetHour = buildTweetHour();
+		LocalDateTime tweetHour = DateUtil.buildTweetHour();
 		HourlySummary hourlySummary = buildHourlySummary(tweetHour,trends.getTrends());
         Jsonb jsonb = JsonbBuilder.create();
         String description = jsonb.toJson(hourlySummary);
 		Document document = new Document()
-                .append("name", tweetHour.toEpochSecond(OffsetDateTime.now().getOffset()))
+                .append("name", DateUtil.getEpochValue(tweetHour))
                 .append("description", description);
         getCollection().insertOne(document);
 		LOGGER.info("Trend Info Loaded For Hour " + tweetHour);
 	}
 
-	private LocalDateTime buildTweetHour() {
-		return LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
-	}
-
-	private String generateBasicAuthValue()	{
+    private String generateBasicAuthValue()	{
     	StringBuilder finalString = new StringBuilder();
     	String authString = consumerKey + ":" + secret;
     	String encodedString = Base64.getEncoder()
