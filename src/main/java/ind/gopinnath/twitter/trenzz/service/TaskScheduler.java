@@ -15,6 +15,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 
 import ind.gopinnath.twitter.trenzz.HourlySummary;
 import ind.gopinnath.twitter.trenzz.TrendResponse;
@@ -52,7 +54,9 @@ public class TaskScheduler {
 
     @Scheduled(cron="0 5 1 ? * *")
     public void purgeOldTrends() {
-		LOGGER.info(" records purged.");
+    	Long beginingOfWeek = DateUtil.getEpochValue(DateUtil.getBeginingOfWeekHour());
+    	DeleteResult result = getCollection().deleteMany(Filters.lt("name",beginingOfWeek));
+		LOGGER.info(result.getDeletedCount() + " Records Purged.");
     }
 
     
