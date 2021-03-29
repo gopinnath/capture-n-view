@@ -1,203 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Twitter Trends in India During Last Week</title>
-    <style>
-        h1, h2, h3, h4, h5, h6 {
-            margin-bottom: 0.5rem;
-            font-weight: 400;
-            line-height: 1.5;
-        }
+<meta charset="utf-8">
+<title>Twitter Trend in India Last Week</title>
+<style>
+    :root {
+        -review_normal: #1b1e23;
+        -review_comment: #a9b0bc;
+        -review_number: #20a5ba;
+        -review_keyword: #c30771;
+        -review_atom: #10a778;
+        -review_string: #008ec4;
+        -review_error: #ffbedc;
+        -review_unknown_variable: #838383;
+        -review_known_variable: #005f87;
+        -review_matchbracket: #20bbfc;
+        -review_key: #6636b4;
+        --mono_fonts: 82%/1.5 Menlo, Consolas, monospace
+    }
 
-        h1 {
-            font-size: 2.5rem;
-        }
+    .renderedgn--collapsed,
+    .renderedgn--expanded,
+    .renderedgn--function,
+    .renderedgn--gray,
+    .renderedgn--import,
+    .renderedgn--string:after,
+    .renderedgn--string:before {
+        color: var(-review_normal)
+    }
 
-        h2 {
-            font-size: 2rem
-        }
+    .renderedgn--collapsed,
+    .renderedgn--inspect a {
+        cursor: pointer
+    }
 
-        h3 {
-            font-size: 1.75rem
-        }
+    .renderedgn--field {
+        text-indent: -1em;
+        margin-left: 1em
+    }
 
-        h4 {
-            font-size: 1.5rem
-        }
+    .renderedgn--empty {
+        color: var(-review_comment)
+    }
 
-        h5 {
-            font-size: 1.25rem
-        }
+    .renderedgn--blue,
+    .renderedgn--keyword {
+        color: #3182bd
+    }
 
-        h6 {
-            font-size: 1rem
-        }
+    .renderedgn--forbidden,
+    .renderedgn--pink {
+        color: #e377c2
+    }
 
-        .lead {
-            font-weight: 300;
-            font-size: 2rem;
-        }
+    .renderedgn--orange {
+        color: #e6550d
+    }
 
-        .banner {
-            font-size: 2.7rem;
-            margin: 0;
-            padding: 2rem 1rem;
-            background-color: #00A1E2;
-            color: white;
-        }
+    .renderedgn--boolean,
+    .renderedgn--null,
+    .renderedgn--undefined {
+        color: var(-review_atom)
+    }
 
-        body {
-            margin: 0;
-            font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-        }
+    .renderedgn--bigint,
+    .renderedgn--date,
+    .renderedgn--green,
+    .renderedgn--number,
+    .renderedgn--regexp,
+    .renderedgn--symbol {
+        color: var(-review_number)
+    }
 
-        code {
-            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 87.5%;
-            color: #e83e8c;
-            word-break: break-word;
-        }
+    .renderedgn--index,
+    .renderedgn--key {
+        color: var(-review_key)
+    }
 
-        .left-column {
-            padding: .75rem;
-            max-width: 75%;
-            min-width: 55%;
-        }
+    .renderedgn--prototype-key {
+        color: #aaa
+    }
 
-        .right-column {
-            padding: .75rem;
-            max-width: 25%;
-        }
+    .renderedgn--empty {
+        font-style: oblique
+    }
 
-        .container {
-            display: flex;
-            width: 100%;
-        }
+    .renderedgn--purple,
+    .renderedgn--string {
+        color: var(-review_string)
+    }
 
-        li {
-            margin: 0.75rem;
-        }
+    .renderedgn--error,
+    .renderedgn--red {
+        color: #e7040f
+    }
 
-        .right-section {
-            margin-left: 1rem;
-            padding-left: 0.5rem;
-        }
+    .renderedgn--inspect {
+        font: var(--mono_fonts);
+        overflow-x: auto;
+        display: none;
+        white-space: pre
+    }
 
-        .right-section h3 {
-            padding-top: 0;
-            font-weight: 200;
-        }
+    .renderedgn--error .renderedgn--inspect {
+        word-break: break-all;
+        white-space: pre-wrap
+    }
+</style>
 
-        .right-section ul {
-            border-left: 0.3rem solid #00A1E2;
-            list-style-type: none;
-            padding-left: 0;
-        }
+<body style="font-family: Arial, Helvetica, sans-serif;font-style: normal;font-size: 11px;">
+    <p>Following graph show the hourly Twitter trends in India starting sunday a week before until last huor.</p>
+    <script type="module">
 
-    </style>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
-	<script src="https://d3js.org/d3-fetch.v1.min.js"></script>
-</head>
-<body>
-<h5>The Sample Application that captures the Twitter Trend Information on Hourly basis.</h5>
-<div id="trendvisualization"></div>
+        import define from "./index.js";
+        import { Xtream, Retweet, Lessie } from "./trenzz.js";
 
-<script>
+        const trenzz = new Xtream();
+        const main = trenzz.module(define, Lessie.into(document.body));
 
-
-// set the dimensions and margins of the graph
-var margin = {top: 50, right: 30, bottom: 100, left: 100},
-    width = 460 - margin.left - margin.right,
-    height = 450 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svg = d3.select("#trendvisualization");
-
-// Create Event Handler Function
-var processResponse = function(data)	{
-	data['hourlySummaries'].forEach(function(hour,index)	{
-		setTimeout(processHourlyData,2000 * index,hour);
-	});
-}
-
-var processTrend = function(trend)	{
-    return { "keyword" :trend.trendSequence + ". " + trend.name,
-        "volume": processVolume(trend)};
-}
-
-var processVolume = function(trend)	{
-	if(trend.tweetVolume === undefined) return 0;
-	return trend.tweetVolume;
-}
-
-var processHourlyData = function(hour)	{
-
-	var trendHour = new Date(hour.hour);
-	
-	d3.selectAll("svg > *").remove();
-	var trendChart = document.getElementById("trendChart");
-	if(trendChart != null)	{
-		trendChart.remove();
-	}
-		
-	svg = d3.select("#trendvisualization")
-	  .append("svg")
-	    .attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
-	    .attr("id","trendChart")
-	  .append("g")
-	    .attr("transform",
-	          "translate(" + margin.left + "," + margin.top + ")");
-	
-	var data = hour['trends'].map(processTrend);
-	var maxVolume = Math.max(...data.map(trend=>trend.volume)); 
-	// X axis
-	var x = d3.scaleBand()
-	  .range([ 0, width ])
-	  .domain(data.map(function(d) { return d.keyword; }))
-	  .padding(0.2);
-	svg.append("g")
-	  .attr("transform", "translate(0," + height + ")")
-	  .call(d3.axisBottom(x))
-	  .selectAll("text")
-	    .attr("transform", "translate(-10,0)rotate(-45)")
-	    .style("text-anchor", "end");
-	
-	var y = d3.scaleLinear()
-	  .domain([0, maxVolume])
-	  .range([ height, 0]);
-	svg.append("g")
-	  .call(d3.axisLeft(y));
-	
-	svg.append("g")
-	    .append("text")
-	    .attr("x", -50)
-	    .attr("y", -30)
-	    .attr("dy", ".71em")
-	    .text(trendHour);
-	
-	svg.selectAll("mybar")
-	  .data(data)
-	  .enter()
-	  .append("rect")
-	    .attr("x", function(d) { return x(d.keyword); })
-	    .attr("width", x.bandwidth())
-	    .attr("fill", "#69b3a2")
-	    // no bar at the beginning thus:
-	    .attr("height", function(d) { return height - y(0); }) // always equal to 0
-	    .attr("y", function(d) { return y(0); });
-	    
-	    svg.selectAll("rect")
-		  .transition()
-		  .duration(800)
-		  .attr("y", function(d) { return y(d.volume); })
-		  .attr("height", function(d) { return height - y(d.volume); })
-		  .delay(function(d,i){return(i*100);});
-}
-
-d3.json("/api/trenzz").then(processResponse);
-</script>
+    </script>
 </body>
-</html>
