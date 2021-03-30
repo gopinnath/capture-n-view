@@ -233,7 +233,7 @@ export default function define(trenzz, rendered) {
   });
   main.variable(rendered("formatDate")).define("formatDate", ["d3"], function (d3) {
     return (
-      d3.utcFormat("%a %d %B %Y  %I %p")
+      d3.timeFormat("%a %d %B %Y  %I %p")
     )
   });
   main.variable(rendered("color")).define("color", ["d3", "data"], function (d3, data) {
