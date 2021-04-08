@@ -24,4 +24,12 @@ public class DateUtil {
 				.minus(1,ChronoUnit.WEEKS);
 		return previousSunday;
 	}
+	
+	public static LocalDateTime getHourBefore48Hours() {
+		LocalDateTime before48Hours = LocalDateTime
+				.now()
+				.truncatedTo(ChronoUnit.HOURS)
+				.minus(48,ChronoUnit.HOURS);
+		return before48Hours;
+	}
 }

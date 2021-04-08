@@ -35,9 +35,10 @@ public class Resource {
     public Summaries summarize() {
 		Summaries summaries = new Summaries();
         List<HourlySummary> hourlyList = new ArrayList<>();
-        Long beginingOfWeek = DateUtil.getEpochValue(DateUtil.getBeginingOfWeekHour());
+        //Long beginingOfWeek = DateUtil.getEpochValue(DateUtil.getBeginingOfWeekHour());
+        Long before48Hours = DateUtil.getEpochValue(DateUtil.getHourBefore48Hours());
         MongoCursor<Document> cursor = getCollection()
-        		.find(Filters.gte("name",beginingOfWeek))
+        		.find(Filters.gte("name",before48Hours))
         		.sort(Sorts.ascending("name"))
         		.iterator();
         Jsonb jsonb = JsonbBuilder.create();
